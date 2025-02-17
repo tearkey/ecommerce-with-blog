@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { AuthDialog } from "@/components/AuthDialog";
 import { useNavigate } from "react-router-dom";
 import { 
   Laptop, 
@@ -60,7 +61,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -89,13 +89,12 @@ const Index = () => {
               <Button variant="outline" size="icon">
                 <ShoppingCart className="h-4 w-4" />
               </Button>
-              <Button>Sign In</Button>
+              <AuthDialog />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="text-center max-w-3xl mx-auto space-y-6">
@@ -113,7 +112,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Categories Section */}
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -133,7 +131,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Featured Products Section Placeholder */}
       <div className="container mx-auto px-4 py-16 bg-secondary/10">
         <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
         <div className="text-center text-muted-foreground">
@@ -141,7 +138,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-secondary border-t">
         <div className="container mx-auto px-4 py-8">
           <div className="grid md:grid-cols-4 gap-8">
