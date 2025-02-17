@@ -1,7 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 import { 
   Laptop, 
   Monitor, 
@@ -16,6 +16,7 @@ import {
 
 const Index = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSearch = () => {
     toast({
@@ -120,6 +121,7 @@ const Index = () => {
             <Card
               key={index}
               className="p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+              onClick={() => navigate('/products')}
             >
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 {category.icon}
