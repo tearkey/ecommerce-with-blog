@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import type { AuthFormData } from "@/types/auth";
 
 export function AuthDialog() {
@@ -22,17 +23,46 @@ export function AuthDialog() {
   });
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { signIn, signUp, user, signOut } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // For now, just show a toast - we'll implement real auth later
-    toast({
-      title: isRegister ? "Registration Successful" : "Login Successful",
-      description: "Welcome to TechStore!",
-    });
-    setOpen(false);
+    setLoading(true);
+
+    try {
+      if (isRegister) {
+        await signUp(formData.email, formData.password, formData.name || "");
+        toast({
+          title: "Registration Successful",
+          description: "Please check your email to verify your account.",
+        });
+      } else {
+        await signIn(formData.email, formData.password);
+        toast({
+          title: "Login Successful",
+          description: "Welcome back to TechStore!",
+        });
+      }
+      setOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (user) {
+    return (
+      <Button variant="outline" onClick={() => signOut()}>
+        Sign Out
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -85,13 +115,14 @@ export function AuthDialog() {
             />
           </div>
           <div className="flex flex-col space-y-4">
-            <Button type="submit">
-              {isRegister ? "Create Account" : "Sign In"}
+            <Button type="submit" disabled={loading}>
+              {loading ? "Loading..." : isRegister ? "Create Account" : "Sign In"}
             </Button>
             <Button
               type="button"
               variant="link"
               onClick={() => setIsRegister(!isRegister)}
+              disabled={loading}
             >
               {isRegister
                 ? "Already have an account? Sign in"
