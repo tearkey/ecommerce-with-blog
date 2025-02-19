@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/sheet";
 import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { formatCurrency } from "@/lib/utils";
 
 export function CartSheet() {
   const { items, removeFromCart, updateQuantity, total } = useCart();
