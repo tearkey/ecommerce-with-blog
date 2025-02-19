@@ -1,9 +1,11 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 import type { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { CartSheet } from "@/components/CartSheet";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const Products = () => {
   const { addToCart } = useCart();
@@ -41,6 +43,7 @@ const Products = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Breadcrumbs />
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">All Products</h1>
         <CartSheet />
