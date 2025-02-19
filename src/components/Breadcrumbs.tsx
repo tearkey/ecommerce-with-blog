@@ -28,9 +28,9 @@ export function Breadcrumbs() {
     <Breadcrumb className="mb-8">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink as={Link} to="/">
+          <Link to="/" className="transition-colors hover:text-foreground">
             <HomeIcon className="h-4 w-4" />
-          </BreadcrumbLink>
+          </Link>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         {pathnames.map((value, index) => {
@@ -43,9 +43,9 @@ export function Breadcrumbs() {
                 <BreadcrumbPage>{routeNames[value] || value}</BreadcrumbPage>
               ) : (
                 <>
-                  <BreadcrumbLink as={Link} to={to}>
+                  <Link to={to} className="transition-colors hover:text-foreground">
                     {routeNames[value] || value}
-                  </BreadcrumbLink>
+                  </Link>
                   <BreadcrumbSeparator />
                 </>
               )}
