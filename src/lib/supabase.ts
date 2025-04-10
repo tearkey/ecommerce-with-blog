@@ -25,8 +25,8 @@ const createMockClient = () => {
   };
 };
 
-// Use mock client for now
-export const supabase = createMockClient() as ReturnType<typeof createClient>;
+// Use mock client for now - cast to unknown first to fix the TypeScript error
+export const supabase = createMockClient() as unknown as ReturnType<typeof createClient>;
 
 // To enable real Supabase connection later, replace the above line with:
 // export const supabase = createClient(supabaseUrl, supabaseAnonKey);
