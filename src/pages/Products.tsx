@@ -4,9 +4,8 @@ import { Card } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 import type { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
-import { CartSheet } from "@/components/CartSheet";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Link } from "react-router-dom";
+import PageLayout from "@/components/PageLayout";
 
 const Products = () => {
   const { addToCart } = useCart();
@@ -43,11 +42,9 @@ const Products = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Breadcrumbs />
+    <PageLayout>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">All Products</h1>
-        <CartSheet />
       </div>
       
       {/* Filters Section */}
@@ -98,7 +95,7 @@ const Products = () => {
           </Card>
         ))}
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
