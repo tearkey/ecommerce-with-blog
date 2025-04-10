@@ -10,4 +10,5 @@ export interface Product {
   specifications: {
     [key: string]: string;
   };
+  isNew?: boolean;
 }
