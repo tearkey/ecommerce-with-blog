@@ -6,6 +6,7 @@ import type { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { CartSheet } from "@/components/CartSheet";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Link } from "react-router-dom";
 
 const Products = () => {
   const { addToCart } = useCart();
@@ -59,15 +60,17 @@ const Products = () => {
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
           <Card key={product.id} className="flex flex-col">
-            <div className="aspect-square relative">
+            <Link to={`/product/${product.id}`} className="aspect-square relative hover:opacity-90 transition-opacity">
               <img
                 src={product.image}
                 alt={product.name}
                 className="object-cover w-full h-full rounded-t-lg"
               />
-            </div>
+            </Link>
             <div className="p-4 flex flex-col flex-grow">
-              <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+              <Link to={`/product/${product.id}`} className="hover:underline">
+                <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+              </Link>
               <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
               <div className="mt-auto">
                 <div className="flex items-center justify-between mb-4">
@@ -76,13 +79,20 @@ const Products = () => {
                     Stock: {product.stock}
                   </span>
                 </div>
-                <Button 
-                  className="w-full" 
-                  onClick={() => addToCart(product)}
-                >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Add to Cart
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    variant="outline" 
+                    asChild
+                  >
+                    <Link to={`/product/${product.id}`}>View Details</Link>
+                  </Button>
+                  <Button
+                    onClick={() => addToCart(product)}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Add
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
