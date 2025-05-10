@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,16 +7,89 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import PageLayout from "@/components/PageLayout";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { z } from "zod";
+
+// Form validation schema
+const contactSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  subject: z.string().min(3, { message: "Subject is required" }),
+  message: z.string().min(10, { message: "Message must be at least 10 characters" })
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
 
 const Contact = () => {
   const { toast } = useToast();
+  const [formData, setFormData] = useState<ContactFormData>({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [errors, setErrors] = useState<Partial<ContactFormData>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+    // Clear error when user starts typing
+    if (errors[id as keyof ContactFormData]) {
+      setErrors(prev => ({ ...prev, [id]: undefined }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast({
-      title: "Message sent",
-      description: "We've received your message and will respond shortly.",
-    });
+    
+    try {
+      // Validate form data
+      contactSchema.parse(formData);
+      
+      setIsSubmitting(true);
+      
+      // Submit to Supabase
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([formData]);
+        
+      if (error) throw error;
+      
+      // Show success message
+      toast({
+        title: "Message sent successfully",
+        description: "We've received your message and will respond shortly.",
+      });
+      
+      // Clear form
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+      
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: Partial<ContactFormData> = {};
+        error.errors.forEach(err => {
+          if (err.path[0]) {
+            fieldErrors[err.path[0] as keyof ContactFormData] = err.message;
+          }
+        });
+        setErrors(fieldErrors);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again later.",
+          variant: "destructive",
+        });
+        console.error("Contact form error:", error);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -67,21 +141,49 @@ const Contact = () => {
               <label htmlFor="name" className="block font-medium mb-2">
                 Name
               </label>
-              <Input id="name" placeholder="Your name" required />
+              <Input 
+                id="name" 
+                placeholder="Your name" 
+                value={formData.name}
+                onChange={handleChange}
+                className={errors.name ? "border-destructive" : ""}
+              />
+              {errors.name && (
+                <p className="text-destructive text-sm mt-1">{errors.name}</p>
+              )}
             </div>
             
             <div>
               <label htmlFor="email" className="block font-medium mb-2">
                 Email
               </label>
-              <Input id="email" type="email" placeholder="you@example.com" required />
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="you@example.com" 
+                value={formData.email}
+                onChange={handleChange}
+                className={errors.email ? "border-destructive" : ""}
+              />
+              {errors.email && (
+                <p className="text-destructive text-sm mt-1">{errors.email}</p>
+              )}
             </div>
             
             <div>
               <label htmlFor="subject" className="block font-medium mb-2">
                 Subject
               </label>
-              <Input id="subject" placeholder="How can we help?" required />
+              <Input 
+                id="subject" 
+                placeholder="How can we help?" 
+                value={formData.subject}
+                onChange={handleChange}
+                className={errors.subject ? "border-destructive" : ""}
+              />
+              {errors.subject && (
+                <p className="text-destructive text-sm mt-1">{errors.subject}</p>
+              )}
             </div>
             
             <div>
@@ -92,11 +194,22 @@ const Contact = () => {
                 id="message" 
                 placeholder="Tell us what you need..." 
                 rows={4}
-                required 
+                value={formData.message}
+                onChange={handleChange}
+                className={errors.message ? "border-destructive" : ""}
               />
+              {errors.message && (
+                <p className="text-destructive text-sm mt-1">{errors.message}</p>
+              )}
             </div>
             
-            <Button type="submit" className="w-full">Send Message</Button>
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </Button>
           </form>
         </Card>
       </div>

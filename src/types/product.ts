@@ -11,4 +11,14 @@ export interface Product {
     [key: string]: string;
   };
   isNew?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProductFilter {
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  isNew?: boolean;
+  inStock?: boolean;
 }
