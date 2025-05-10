@@ -26,7 +26,7 @@ const NewProducts = () => {
         storage: "2TB NVMe SSD",
         display: "17.3\" 240Hz QHD"
       },
-      isNew: true
+      is_new: true
     },
     {
       id: "102",
@@ -42,7 +42,7 @@ const NewProducts = () => {
         responseTime: "1ms",
         panel: "Mini-LED"
       },
-      isNew: true
+      is_new: true
     },
     {
       id: "103",
@@ -58,7 +58,7 @@ const NewProducts = () => {
         battery: "Up to 80 hours",
         features: "Hot-swappable switches"
       },
-      isNew: true
+      is_new: true
     },
     {
       id: "104",
@@ -74,7 +74,7 @@ const NewProducts = () => {
         memory: "32GB DDR5",
         storage: "1TB NVMe SSD"
       },
-      isNew: true
+      is_new: true
     }
   ];
 

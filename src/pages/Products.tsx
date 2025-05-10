@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -131,7 +130,7 @@ const Products = () => {
                 alt={product.name}
                 className="object-cover w-full h-full rounded-t-lg"
               />
-              {product.isNew && (
+              {product.is_new && (
                 <span className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                   New
                 </span>
