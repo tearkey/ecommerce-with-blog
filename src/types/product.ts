@@ -10,7 +10,7 @@ export interface Product {
   specifications: {
     [key: string]: string;
   };
-  isNew?: boolean;
+  is_new?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -22,3 +22,11 @@ export interface ProductFilter {
   isNew?: boolean;
   inStock?: boolean;
 }
+
+export interface ProductCategory {
+  name: string;
+  description: string;
+  image?: string;
+  slug: string;
+}
+
