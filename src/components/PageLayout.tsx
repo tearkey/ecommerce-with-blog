@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Search,
@@ -11,20 +11,43 @@ import { CartSheet } from "@/components/CartSheet";
 import { AuthDialog } from "@/components/AuthDialog";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useToast } from "@/components/ui/use-toast";
+import { useForm } from "react-hook-form";
+import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 
 interface PageLayoutProps {
   children: React.ReactNode;
   showBreadcrumbs?: boolean;
 }
 
+interface SearchFormValues {
+  query: string;
+}
+
 const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearch = () => {
-    toast({
-      title: "Search",
-      description: "Search functionality coming soon!",
-    });
+  const form = useForm<SearchFormValues>({
+    defaultValues: {
+      query: '',
+    },
+  });
+
+  const onSubmit = (data: SearchFormValues) => {
+    if (!data.query.trim()) {
+      toast({
+        title: "Search Error",
+        description: "Please enter a search term",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Navigate to products page with search query
+    navigate(`/products?search=${encodeURIComponent(data.query)}`);
+    form.reset();
+    setIsSearching(false);
   };
 
   return (
@@ -40,19 +63,34 @@ const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
             </div>
             <div className="flex items-center space-x-4">
               <div className="relative hidden md:block">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                  onClick={handleSearch}
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="flex">
+                    <FormField
+                      control={form.control}
+                      name="query"
+                      render={({ field }) => (
+                        <FormItem className="relative">
+                          <FormControl>
+                            <input
+                              type="text"
+                              placeholder="Search products..."
+                              className="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary"
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                      type="submit"
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </form>
+                </Form>
               </div>
               <Link to="/products">
                 <Button variant="outline">Products</Button>

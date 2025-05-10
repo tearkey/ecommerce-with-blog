@@ -17,6 +17,24 @@ export const supabase = createClient<Database>(
   supabaseAnonKey || 'your-anon-key'
 );
 
+// Helper to check if Supabase is properly configured
+export const isSupabaseConfigured = async (): Promise<boolean> => {
+  try {
+    // Try a simple query to check if connection works
+    const { data, error } = await supabase
+      .from('products')
+      .select('id')
+      .limit(1);
+    
+    if (error && error.message.includes('Invalid API')) {
+      return false;
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 // Helper functions for common Supabase operations
 export const getProfile = async (userId: string) => {
   const { data, error } = await supabase
@@ -47,3 +65,46 @@ export const updateProfile = async (userId: string, updates: Partial<{
   return data;
 };
 
+// Products related helpers
+export const getProducts = async (filters: { 
+  category?: string;
+  isNew?: boolean;
+  searchQuery?: string;
+} = {}) => {
+  let query = supabase.from('products').select('*');
+  
+  if (filters.category) {
+    query = query.eq('category', filters.category);
+  }
+  
+  if (filters.isNew) {
+    query = query.eq('is_new', true);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) throw error;
+  
+  // Handle search query filtering client-side if provided
+  // (Supabase doesn't have full-text search in the free tier)
+  if (filters.searchQuery && data) {
+    const searchLower = filters.searchQuery.toLowerCase();
+    return data.filter(product => 
+      product.name.toLowerCase().includes(searchLower) || 
+      product.description.toLowerCase().includes(searchLower)
+    );
+  }
+  
+  return data;
+};
+
+export const getProductById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
