@@ -1,61 +1,68 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CartProvider } from "@/context/CartContext";
-import { AuthProvider } from "@/context/AuthContext";
-import Index from "./pages/Index";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import NotFound from "./pages/NotFound";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Returns from "./pages/Returns";
-import Shipping from "./pages/Shipping";
-import Offers from "./pages/Offers";
-import NewProducts from "./pages/NewProducts";
-import Support from "./pages/Support";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import Admin from "./pages/Admin";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
+// Pages
+import IndexPage from '@/pages/Index';
+import ProductsPage from '@/pages/Products';
+import ProductDetailPage from '@/pages/ProductDetail';
+import AboutPage from '@/pages/About';
+import ContactPage from '@/pages/Contact';
+import BlogPage from '@/pages/Blog';
+import BlogPostPage from '@/pages/BlogPost';
+import PrivacyPage from '@/pages/Privacy';
+import TermsPage from '@/pages/Terms';
+import ShippingPage from '@/pages/Shipping';
+import ReturnsPage from '@/pages/Returns';
+import SupportPage from '@/pages/Support';
+import OffersPage from '@/pages/Offers';
+import NewProductsPage from '@/pages/NewProducts';
+import AdminPage from '@/pages/Admin';
+import NotFoundPage from '@/pages/NotFound';
+
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/returns" element={<Returns />} />
-              <Route path="/shipping" element={<Shipping />} />
-              <Route path="/offers" element={<Offers />} />
-              <Route path="/new-products" element={<NewProducts />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </CartProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <ThemeProvider defaultTheme="light" storageKey="techstore-theme">
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <CartProvider>
+              <Router>
+                <Routes>
+                  <Route path="/" element={<IndexPage />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/products/:id" element={<ProductDetailPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogPostPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/shipping" element={<ShippingPage />} />
+                  <Route path="/returns" element={<ReturnsPage />} />
+                  <Route path="/support" element={<SupportPage />} />
+                  <Route path="/offers" element={<OffersPage />} />
+                  <Route path="/new-products" element={<NewProductsPage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </Router>
+              <Toaster />
+            </CartProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
+    </ThemeProvider>
+  );
+}
 
 export default App;

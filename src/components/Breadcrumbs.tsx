@@ -9,10 +9,24 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { HomeIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getBlogPostBySlug } from "@/lib/blog";
 
+// Map of route paths to their display names
 const routeNames: Record<string, string> = {
   "products": "Products",
   "checkout": "Checkout",
+  "blog": "Blog",
+  "contact": "Contact",
+  "returns": "Returns Policy",
+  "shipping": "Shipping Information",
+  "about": "About Us",
+  "privacy": "Privacy Policy",
+  "terms": "Terms of Service",
+  "support": "Support",
+  "offers": "Special Offers",
+  "new-products": "New Products",
+  "admin": "Admin Dashboard"
 };
 
 export function Breadcrumbs() {
@@ -24,6 +38,20 @@ export function Breadcrumbs() {
     return null;
   }
 
+  // Extract blog post slug if present
+  const isBlogPost = pathnames.length === 2 && pathnames[0] === "blog";
+  const blogPostSlug = isBlogPost ? pathnames[1] : null;
+
+  // If this is a blog post page, fetch the title
+  const { data: blogPost } = useQuery({
+    queryKey: ['breadcrumbBlogPost', blogPostSlug],
+    queryFn: () => {
+      if (!blogPostSlug) return null;
+      return getBlogPostBySlug(blogPostSlug);
+    },
+    enabled: !!blogPostSlug,
+  });
+  
   return (
     <Breadcrumb className="mb-8">
       <BreadcrumbList>
@@ -35,19 +63,32 @@ export function Breadcrumbs() {
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
+        
         {pathnames.map((value, index) => {
           const to = `/${pathnames.slice(0, index + 1).join("/")}`;
           const isLast = index === pathnames.length - 1;
-
+          
+          // Special handling for blog posts
+          if (isLast && blogPost && isBlogPost) {
+            return (
+              <BreadcrumbItem key={to}>
+                <BreadcrumbPage>{blogPost.title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            );
+          }
+          
+          // Either use the mapped name from routeNames or capitalize the first letter
+          const displayName = routeNames[value] || value.charAt(0).toUpperCase() + value.slice(1).replace(/-/g, ' ');
+          
           return (
             <BreadcrumbItem key={to}>
               {isLast ? (
-                <BreadcrumbPage>{routeNames[value] || value}</BreadcrumbPage>
+                <BreadcrumbPage>{displayName}</BreadcrumbPage>
               ) : (
                 <>
                   <BreadcrumbLink asChild>
                     <Link to={to} className="transition-colors hover:text-foreground">
-                      {routeNames[value] || value}
+                      {displayName}
                     </Link>
                   </BreadcrumbLink>
                   <BreadcrumbSeparator />

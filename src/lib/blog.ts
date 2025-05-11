@@ -160,3 +160,56 @@ export const deleteBlogCategory = async (id: string) => {
   if (error) throw error;
   return true;
 };
+
+// SEO Related API Endpoints
+export const getGlobalSEOSettings = async () => {
+  const { data, error } = await supabase
+    .from('seo_settings')
+    .select('*')
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
+
+export const updateGlobalSEOSettings = async (settings: any) => {
+  const { data, error } = await supabase
+    .from('seo_settings')
+    .update(settings)
+    .eq('id', 1) // Assuming there's only one global settings row
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+};
+
+// Generate structured data for blog posts
+export const generateArticleStructuredData = (post: BlogPost) => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.excerpt,
+    "image": post.featured_image,
+    "datePublished": post.published_date,
+    "author": {
+      "@type": "Person",
+      "name": post.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "TechStore",
+      "logo": {
+        "@type": "ImageObject",
+        "url": window.location.origin + "/logo.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": window.location.href
+    }
+  };
+  
+  return JSON.stringify(structuredData);
+};

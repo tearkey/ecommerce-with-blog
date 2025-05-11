@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/blog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BlogPost } from "@/types/blog";
@@ -49,9 +48,8 @@ const BlogPostPage = () => {
   // Loading state
   if (isLoading) {
     return (
-      <PageLayout>
+      <PageLayout showBreadcrumbs={false}>
         <div className="container mx-auto px-4 py-8">
-          <Breadcrumbs />
           <div className="max-w-3xl mx-auto">
             <Skeleton className="h-8 w-40 mb-6" />
             <Skeleton className="aspect-video w-full mb-8" />
@@ -77,7 +75,7 @@ const BlogPostPage = () => {
   // Error or post not found
   if (error || !post) {
     return (
-      <PageLayout>
+      <PageLayout showBreadcrumbs={false}>
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold">Blog Post Not Found</h1>
           <p className="mt-4">Sorry, the blog post you're looking for doesn't exist.</p>
@@ -96,9 +94,33 @@ const BlogPostPage = () => {
   const filteredRelatedPosts = relatedPosts.filter(related => related.id !== post.id).slice(0, 2);
   
   return (
-    <PageLayout>
+    <PageLayout showBreadcrumbs={false}>
       <div className="container mx-auto px-4 py-8">
-        <Breadcrumbs />
+        {/* Custom breadcrumbs for blog posts to avoid duplication */}
+        <nav aria-label="breadcrumb" className="mb-8">
+          <ol className="flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5">
+            <li className="inline-flex items-center gap-1.5">
+              <Link to="/" className="transition-colors hover:text-foreground">
+                <span className="sr-only">Home</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </Link>
+            </li>
+            <li role="presentation" aria-hidden="true" className="[&>svg]:size-3.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <Link to="/blog" className="transition-colors hover:text-foreground">
+                Blog
+              </Link>
+            </li>
+            <li role="presentation" aria-hidden="true" className="[&>svg]:size-3.5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <span role="link" aria-disabled="true" aria-current="page" className="font-normal text-foreground">{post.title}</span>
+            </li>
+          </ol>
+        </nav>
         
         <Button variant="outline" size="sm" asChild className="mb-6">
           <Link to="/blog">

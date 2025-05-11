@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Search,
@@ -26,7 +26,12 @@ interface SearchFormValues {
 const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSearching, setIsSearching] = useState(false);
+
+  // Don't show breadcrumbs on blog post pages since they have custom breadcrumbs
+  const isBlogPost = location.pathname.startsWith('/blog/') && location.pathname !== '/blog/';
+  const shouldShowBreadcrumbs = showBreadcrumbs && !isBlogPost;
 
   const form = useForm<SearchFormValues>({
     defaultValues: {
@@ -95,6 +100,9 @@ const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
               <Link to="/products">
                 <Button variant="outline">Products</Button>
               </Link>
+              <Link to="/blog">
+                <Button variant="outline">Blog</Button>
+              </Link>
               <CartSheet />
               <AuthDialog />
             </div>
@@ -104,7 +112,7 @@ const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
 
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
-          {showBreadcrumbs && <Breadcrumbs />}
+          {shouldShowBreadcrumbs && <Breadcrumbs />}
           {children}
         </div>
       </main>
