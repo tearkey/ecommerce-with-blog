@@ -58,6 +58,7 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     defaultValues: {
       title: initialData.title || "",
       description: initialData.description || "",
+      // Convert array to comma-separated string for form input
       keywords: initialData.keywords ? initialData.keywords.join(", ") : "",
       ogTitle: initialData.ogTitle || "",
       ogDescription: initialData.ogDescription || "",
@@ -76,7 +77,7 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     onSave({
       title: values.title,
       description: values.description || "",  // Ensure required fields have values
-      keywords: values.keywords,
+      keywords: values.keywords, // Keywords is now transformed to string[] by the schema
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
       ogImage: values.ogImage,
