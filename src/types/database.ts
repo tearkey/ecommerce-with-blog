@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -193,7 +192,79 @@ export interface Database {
           created_at?: string
         }
       }
+      blog_posts: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          excerpt: string
+          content: string
+          featured_image: string
+          author: string
+          published_date: string
+          category: string
+          tags: Json
+          is_published: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          slug: string
+          excerpt: string
+          content: string
+          featured_image: string
+          author: string
+          published_date?: string
+          category: string
+          tags?: Json
+          is_published?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          slug?: string
+          excerpt?: string
+          content?: string
+          featured_image?: string
+          author?: string
+          published_date?: string
+          category?: string
+          tags?: Json
+          is_published?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      blog_categories: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          description: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          description: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          description?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
-

@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import PageLayout from "@/components/PageLayout";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -7,70 +8,93 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import type { BlogPost } from "@/types/blog";
+import { getBlogPosts, getBlogCategories } from "@/lib/blog";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-// Sample blog posts data - in a real app with Supabase, this would come from the database
-const blogPosts: BlogPost[] = [
-  {
-    id: "1",
-    title: "Top 5 Gaming Laptops in 2025",
-    slug: "top-5-gaming-laptops-2025",
-    excerpt: "Discover the most powerful gaming laptops that deliver exceptional performance for modern games.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl quis tincidunt ultricies, nunc nisl ultricies nunc, quis ultricies nisl nisl quis tincidunt ultricies.",
-    featured_image: "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80",
-    author: "Tech Reviewer",
-    published_date: "2025-05-01",
-    category: "Gaming",
-    tags: ["laptops", "gaming", "tech-review"],
-    is_published: true
-  },
-  {
-    id: "2",
-    title: "Building a Productivity Workstation: Essential Components",
-    slug: "building-productivity-workstation-essential-components",
-    excerpt: "Learn how to build the perfect workstation for maximum productivity and efficiency.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl quis tincidunt ultricies, nunc nisl ultricies nunc, quis ultricies nisl nisl quis tincidunt ultricies.",
-    featured_image: "https://images.unsplash.com/photo-1547082299-de196ea013d6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80",
-    author: "Office Setup Pro",
-    published_date: "2025-04-15",
-    category: "Productivity",
-    tags: ["office-setup", "workstation", "productivity"],
-    is_published: true
-  },
-  {
-    id: "3",
-    title: "Understanding Monitor Specifications for Different Use Cases",
-    slug: "understanding-monitor-specifications-different-use-cases",
-    excerpt: "A comprehensive guide to monitor specs and how to choose the right one for your needs.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl quis tincidunt ultricies, nunc nisl ultricies nunc, quis ultricies nisl nisl quis tincidunt ultricies.",
-    featured_image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80",
-    author: "Display Expert",
-    published_date: "2025-03-21",
-    category: "Monitors",
-    tags: ["displays", "monitors", "buying-guide"],
-    is_published: true
-  }
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import type { BlogPost } from "@/types/blog";
 
 const Blog = () => {
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  // Get all unique categories
-  const categories = [...new Set(blogPosts.map(post => post.category))];
+  // Fetch blog posts
+  const { data: posts, isLoading: postsLoading, error: postsError } = useQuery({
+    queryKey: ['blogPosts', { category: selectedCategory }],
+    queryFn: () => getBlogPosts({ 
+      category: selectedCategory || undefined,
+      publishedOnly: true 
+    }),
+  });
   
-  // Filter posts based on search and category
-  const filteredPosts = blogPosts.filter(post => {
-    const matchesSearch = searchQuery === "" || 
+  // Fetch categories
+  const { data: categoriesData } = useQuery({
+    queryKey: ['blogCategories'],
+    queryFn: getBlogCategories,
+    // If fetching categories fails, we'll fall back to the ones from the posts
+  });
+  
+  // If we don't have categories from the API, extract them from posts
+  const categories = categoriesData?.map(c => c.name) || 
+    [...new Set((posts || []).map(post => post.category))];
+  
+  // Filter posts based on search
+  const filteredPosts = posts?.filter(post => {
+    return searchQuery === "" || 
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesCategory = selectedCategory === null || post.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  }) || [];
+
+  // Loading states
+  if (postsLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold mb-8">Blog</h1>
+          
+          <div className="mb-8 space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 w-20" />
+              ))}
+            </div>
+          </div>
+          
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="h-48 w-full" />
+                <div className="p-6">
+                  <Skeleton className="h-6 w-24 mb-4" />
+                  <Skeleton className="h-8 w-full mb-4" />
+                  <Skeleton className="h-20 w-full mb-4" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Error state
+  if (postsError) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold mb-8">Blog</h1>
+          <div className="p-4 border border-destructive/30 bg-destructive/10 rounded-md">
+            <p>Failed to load blog posts. Please try again later.</p>
+            <Button className="mt-4" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>
@@ -126,7 +150,7 @@ const Blog = () => {
               <CardContent className="flex-grow p-6">
                 <div className="flex flex-wrap gap-2 mb-3">
                   <Badge>{post.category}</Badge>
-                  {post.tags.slice(0, 2).map(tag => (
+                  {Array.isArray(post.tags) && post.tags.slice(0, 2).map(tag => (
                     <Badge variant="outline" key={tag}>
                       {tag}
                     </Badge>
