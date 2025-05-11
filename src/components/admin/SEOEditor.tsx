@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,7 +28,8 @@ interface SEOEditorProps {
 const seoFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(70, "Title should be 70 characters or less"),
   description: z.string().max(160, "Description should be 160 characters or less"),
-  keywords: z.string().transform((val) => val.split(',').map(k => k.trim()).filter(Boolean)),
+  keywords: z.string()
+    .transform((val) => val.split(',').map(k => k.trim()).filter(Boolean)),
   ogTitle: z.string().max(65, "Open Graph title should be 65 characters or less").optional(),
   ogDescription: z.string().max(155, "Open Graph description should be 155 characters or less").optional(),
   ogImage: z.string().url("Must be a valid URL").optional().or(z.literal("")),
@@ -57,8 +59,7 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     defaultValues: {
       title: initialData.title || "",
       description: initialData.description || "",
-      // Fix: Convert array to comma-separated string for the form
-      keywords: initialData.keywords ? initialData.keywords.join(", ") : "",
+      keywords: Array.isArray(initialData.keywords) ? initialData.keywords.join(", ") : "",
       ogTitle: initialData.ogTitle || "",
       ogDescription: initialData.ogDescription || "",
       ogImage: initialData.ogImage || "",
@@ -76,8 +77,8 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     onSave({
       title: values.title,
       description: values.description || "",  // Ensure required fields have values
-      // Here's the fix: values.keywords is already transformed to string[] by the schema
-      keywords: values.keywords, 
+      // keywords is already transformed to string[] by the schema
+      keywords: values.keywords,
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
       ogImage: values.ogImage,
