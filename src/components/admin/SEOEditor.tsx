@@ -53,8 +53,10 @@ const seoFormSchema = z.object({
     ),
 });
 
+type SeoFormValues = z.infer<typeof seoFormSchema>;
+
 const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
-  const form = useForm<z.infer<typeof seoFormSchema>>({
+  const form = useForm<SeoFormValues>({
     resolver: zodResolver(seoFormSchema),
     defaultValues: {
       title: initialData.title || "",
@@ -73,12 +75,12 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof seoFormSchema>) {
+  function onSubmit(values: SeoFormValues) {
     // The keywords field is automatically transformed to string[] by the schema
     onSave({
       title: values.title,
       description: values.description || "",
-      keywords: values.keywords, // Keywords is now transformed to string[] by the schema
+      keywords: values.keywords as string[], // Keywords is transformed to string[] by the schema
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
       ogImage: values.ogImage,
