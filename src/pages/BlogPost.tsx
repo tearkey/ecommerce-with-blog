@@ -28,8 +28,10 @@ const BlogPostPage = () => {
       return getBlogPostBySlug(slug);
     },
     retry: 1,
-    onError: (err) => {
-      console.error("Error fetching blog post:", err);
+    meta: {
+      onError: (err: Error) => {
+        console.error("Error fetching blog post:", err);
+      }
     }
   });
   

@@ -49,9 +49,10 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ post, onCancel, onSave }) => {
   const { data: categories, isLoading: loadingCategories } = useQuery({
     queryKey: ['blogCategories'],
     queryFn: getBlogCategories,
-    // If this fails, don't crash the form
-    onError: (error) => {
-      console.error("Failed to load categories:", error);
+    meta: {
+      onError: (error: Error) => {
+        console.error("Failed to load categories:", error);
+      }
     }
   });
 
