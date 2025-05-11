@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import type { BlogPost } from "@/types/blog";
