@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -78,6 +79,7 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     onSave({
       title: values.title,
       description: values.description || "",
+      // Ensure keywords is treated as a string array
       keywords: Array.isArray(values.keywords) ? values.keywords : [],
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
