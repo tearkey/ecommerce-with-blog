@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -58,6 +57,7 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     defaultValues: {
       title: initialData.title || "",
       description: initialData.description || "",
+      // Fix: Convert array to comma-separated string for the form
       keywords: initialData.keywords ? initialData.keywords.join(", ") : "",
       ogTitle: initialData.ogTitle || "",
       ogDescription: initialData.ogDescription || "",
@@ -72,10 +72,20 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
   });
 
   function onSubmit(values: z.infer<typeof seoFormSchema>) {
-    // Transform string keywords to array before saving
+    // Fix: Ensure all required fields are present when calling onSave
     onSave({
-      ...values,
+      title: values.title,
+      description: values.description || "",  // Ensure required fields have values
       keywords: values.keywords,
+      ogTitle: values.ogTitle,
+      ogDescription: values.ogDescription,
+      ogImage: values.ogImage,
+      twitterTitle: values.twitterTitle,
+      twitterDescription: values.twitterDescription,
+      twitterImage: values.twitterImage,
+      canonicalUrl: values.canonicalUrl,
+      noIndex: values.noIndex,
+      structuredData: values.structuredData,
     });
   }
 
