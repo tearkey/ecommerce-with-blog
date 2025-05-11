@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -73,10 +74,10 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
   });
 
   function onSubmit(values: z.infer<typeof seoFormSchema>) {
-    // Fix: Ensure all required fields are present and correct types when calling onSave
+    // The keywords field is automatically transformed to string[] by the schema
     onSave({
       title: values.title,
-      description: values.description || "",  // Ensure required fields have values
+      description: values.description || "",
       keywords: values.keywords, // Keywords is now transformed to string[] by the schema
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
