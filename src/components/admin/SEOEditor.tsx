@@ -72,11 +72,12 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
   });
 
   function onSubmit(values: z.infer<typeof seoFormSchema>) {
-    // Fix: Ensure all required fields are present when calling onSave
+    // Fix: Ensure all required fields are present and correct types when calling onSave
     onSave({
       title: values.title,
       description: values.description || "",  // Ensure required fields have values
-      keywords: values.keywords,
+      // Here's the fix: values.keywords is already transformed to string[] by the schema
+      keywords: values.keywords, 
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
       ogImage: values.ogImage,
