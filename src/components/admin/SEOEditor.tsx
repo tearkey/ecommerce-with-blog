@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -59,7 +58,7 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     defaultValues: {
       title: initialData.title || "",
       description: initialData.description || "",
-      keywords: Array.isArray(initialData.keywords) ? initialData.keywords.join(", ") : "",
+      keywords: initialData.keywords ? initialData.keywords.join(", ") : "",
       ogTitle: initialData.ogTitle || "",
       ogDescription: initialData.ogDescription || "",
       ogImage: initialData.ogImage || "",
@@ -77,7 +76,6 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     onSave({
       title: values.title,
       description: values.description || "",  // Ensure required fields have values
-      // keywords is already transformed to string[] by the schema
       keywords: values.keywords,
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
