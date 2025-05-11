@@ -19,6 +19,9 @@ import NewProducts from "./pages/NewProducts";
 import Support from "./pages/Support";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,9 @@ const App = () => (
               <Route path="/support" element={<Support />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

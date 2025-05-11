@@ -1,3 +1,4 @@
+
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,6 +45,21 @@ const Index = () => {
       image: "https://images.unsplash.com/photo-1625723443741-e974ce5cdb41?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80",
       description: "Keyboards, mice, and other accessories"
     },
+  ];
+
+  const latestBlogPosts = [
+    {
+      title: "Top 5 Gaming Laptops in 2025",
+      slug: "top-5-gaming-laptops-2025",
+      image: "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80",
+      excerpt: "Discover the most powerful gaming laptops that deliver exceptional performance for modern games.",
+    },
+    {
+      title: "Building a Productivity Workstation",
+      slug: "building-productivity-workstation-essential-components",
+      image: "https://images.unsplash.com/photo-1547082299-de196ea013d6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80",
+      excerpt: "Learn how to build the perfect workstation for maximum productivity and efficiency.",
+    }
   ];
 
   return (
@@ -108,6 +124,43 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold">Latest Articles</h2>
+            <Button variant="outline" asChild>
+              <Link to="/blog">View All Articles</Link>
+            </Button>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {latestBlogPosts.map((post, index) => (
+              <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="grid md:grid-cols-2 h-full">
+                  <div className="aspect-square md:aspect-auto overflow-hidden">
+                    <img 
+                      src={post.image} 
+                      alt={post.title}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <CardContent className="p-6 flex flex-col">
+                    <h3 className="text-xl font-semibold mb-2 line-clamp-2">{post.title}</h3>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">{post.excerpt}</p>
+                    <div className="mt-auto">
+                      <Button variant="outline" asChild className="w-full">
+                        <Link to={`/blog/${post.slug}`}>Read Article</Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </div>
+              </Card>
             ))}
           </div>
         </div>
