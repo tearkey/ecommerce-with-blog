@@ -79,8 +79,8 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     onSave({
       title: values.title,
       description: values.description || "",
-      // Fix the type error by ensuring keywords is always a string array
-      keywords: Array.isArray(values.keywords) ? values.keywords : [],
+      // The transformed value from the schema should already be a string[]
+      keywords: values.keywords as unknown as string[],
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
       ogImage: values.ogImage,
