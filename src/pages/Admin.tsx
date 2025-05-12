@@ -38,8 +38,13 @@ const Admin = () => {
     checkSupabase();
   }, []);
 
-  // Redirect non-admin users to login or show access denied
+  // Redirect non-admin users to login
   useEffect(() => {
+    if (!user) {
+      // Do nothing, we'll show the login prompt below
+      return;
+    }
+    
     if (user && !isAdmin) {
       toast({
         title: "Access Denied",
@@ -76,6 +81,7 @@ const Admin = () => {
     setSelectedPost(undefined);
   };
   
+  // If user is not logged in, show login prompt
   if (!user) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
@@ -88,9 +94,9 @@ const Admin = () => {
           <CardContent className="space-y-4">
             <Alert>
               <AlertTitle>Authentication Required</AlertTitle>
-              <AlertDescription>
-                You need to be logged in to access the admin panel.
-                <div className="mt-2 text-sm">
+              <AlertDescription className="space-y-2">
+                <p>You need to be logged in as an admin to access this area.</p>
+                <div className="text-sm bg-blue-50 p-2 rounded border border-blue-200 mt-2">
                   <strong>For demo:</strong> Use "tearkey@admin.com" with password "tearkey"
                 </div>
               </AlertDescription>
@@ -99,7 +105,9 @@ const Admin = () => {
               <Button variant="outline" asChild>
                 <Link to="/">Back to Homepage</Link>
               </Button>
-              <Button onClick={() => navigate("/")}>Sign In</Button>
+              <Button asChild>
+                <Link to="/">Sign In</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
