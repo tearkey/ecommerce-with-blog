@@ -79,7 +79,7 @@ const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
     onSave({
       title: values.title,
       description: values.description || "",
-      // Ensure keywords is treated as a string array
+      // Fix the type error by ensuring keywords is always a string array
       keywords: Array.isArray(values.keywords) ? values.keywords : [],
       ogTitle: values.ogTitle,
       ogDescription: values.ogDescription,
