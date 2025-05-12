@@ -10,13 +10,19 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
+  isAdmin: boolean; // Added to check admin status
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Admin credentials for demo purposes
+const ADMIN_EMAIL = "tearkey@admin.com";
+const ADMIN_PASSWORD = "tearkey";
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -24,7 +30,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        
+        // Check if current user is admin
+        if (currentUser?.email === ADMIN_EMAIL) {
+          setIsAdmin(true);
+        }
       } catch (error) {
         console.error("Auth initialization error:", error);
       } finally {
@@ -38,7 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      // Check if current user is admin
+      if (currentUser?.email === ADMIN_EMAIL) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -46,6 +66,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Special case for demo admin login
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        // For demo purposes, simulate admin login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) {
+          // If the admin account doesn't exist yet in Supabase, create it
+          if (error.message.includes("Invalid login credentials")) {
+            // Try to create the admin account
+            const { error: signUpError } = await supabase.auth.signUp({
+              email,
+              password,
+              options: {
+                data: {
+                  name: "Admin User",
+                  role: "admin",
+                },
+              },
+            });
+            
+            if (signUpError) throw signUpError;
+            
+            // Try login again
+            const { error: retryError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+            
+            if (retryError) throw retryError;
+          } else {
+            throw error;
+          }
+        }
+        
+        setIsAdmin(true);
+        toast({
+          title: "Admin Login Successful",
+          description: "You are now logged in as an administrator",
+        });
+        return;
+      }
+
+      // Regular user login
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -89,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isAdmin }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeBuilderProvider } from '@/context/ThemeBuilderContext';
 
 // Pages
 import IndexPage from '@/pages/Index';
@@ -36,27 +37,29 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <CartProvider>
-              <Router>
-                <Routes>
-                  <Route path="/" element={<IndexPage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/products/:id" element={<ProductDetailPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/blog" element={<BlogPage />} />
-                  <Route path="/blog/:slug" element={<BlogPostPage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/shipping" element={<ShippingPage />} />
-                  <Route path="/returns" element={<ReturnsPage />} />
-                  <Route path="/support" element={<SupportPage />} />
-                  <Route path="/offers" element={<OffersPage />} />
-                  <Route path="/new-products" element={<NewProductsPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </Router>
-              <Toaster />
+              <ThemeBuilderProvider>
+                <Router>
+                  <Routes>
+                    <Route path="/" element={<IndexPage />} />
+                    <Route path="/products" element={<ProductsPage />} />
+                    <Route path="/products/:id" element={<ProductDetailPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/blog/:slug" element={<BlogPostPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/shipping" element={<ShippingPage />} />
+                    <Route path="/returns" element={<ReturnsPage />} />
+                    <Route path="/support" element={<SupportPage />} />
+                    <Route path="/offers" element={<OffersPage />} />
+                    <Route path="/new-products" element={<NewProductsPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </Router>
+                <Toaster />
+              </ThemeBuilderProvider>
             </CartProvider>
           </AuthProvider>
         </QueryClientProvider>

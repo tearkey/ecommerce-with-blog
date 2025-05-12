@@ -2,9 +2,24 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
+import ThemeTemplate from "@/components/ThemeTemplate";
 import { HomeIcon, ShoppingBagIcon, PhoneIcon } from "lucide-react";
+import { useThemeBuilder } from "@/context/ThemeBuilderContext";
 
 const NotFound = () => {
+  const { getTemplateByType } = useThemeBuilder();
+  const hasCustomTemplate = getTemplateByType("error_404");
+
+  // If we have a custom template, use it instead of the default one
+  if (hasCustomTemplate) {
+    return (
+      <PageLayout showBreadcrumbs={false}>
+        <ThemeTemplate type="error_404" />
+      </PageLayout>
+    );
+  }
+
+  // Default 404 page
   return (
     <PageLayout showBreadcrumbs={false}>
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
