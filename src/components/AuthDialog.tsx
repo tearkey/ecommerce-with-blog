@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import type { AuthFormData } from "@/types/auth";
 import { z } from "zod";
-import { Loader2, UserCircle } from "lucide-react";
+import { Loader2, UserCircle, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -38,6 +40,16 @@ export function AuthDialog() {
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signOut } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Auto-fill admin credentials for easy demo access
+  const fillDemoCredentials = () => {
+    setFormData({
+      email: "tearkey@admin.com",
+      password: "tearkey",
+      name: "",
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -45,6 +57,10 @@ export function AuthDialog() {
     // Clear error when user types
     if (errors[id]) {
       setErrors(prev => ({ ...prev, [id]: "" }));
+    }
+    // Clear login error when typing
+    if (loginError) {
+      setLoginError(null);
     }
   };
 
@@ -72,6 +88,7 @@ export function AuthDialog() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
     
     if (!validateForm()) return;
     
@@ -93,11 +110,8 @@ export function AuthDialog() {
       }
       setOpen(false);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
+      console.error("Auth error:", error);
+      setLoginError(error instanceof Error ? error.message : "Failed to authenticate. Try using the demo credentials.");
     } finally {
       setLoading(false);
     }
@@ -127,6 +141,13 @@ export function AuthDialog() {
           <DialogTitle className="text-center text-xl">
             {isRegister ? "Create Account" : "Sign In"}
           </DialogTitle>
+          <DialogDescription className="text-center text-sm text-muted-foreground">
+            {loginError ? (
+              <Alert className="mt-2 bg-destructive/10 text-destructive">
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
+            ) : null}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {isRegister && (
@@ -179,6 +200,22 @@ export function AuthDialog() {
               <p className="text-destructive text-sm">{errors.password}</p>
             )}
           </div>
+
+          <Alert className="bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              For demo: Use <strong>"tearkey@admin.com"</strong> with password <strong>"tearkey"</strong>
+              <Button 
+                variant="link" 
+                onClick={fillDemoCredentials} 
+                className="p-0 h-auto ml-1 text-xs underline"
+                type="button"
+              >
+                Fill credentials
+              </Button>
+            </AlertDescription>
+          </Alert>
+
           <div className="flex flex-col space-y-4 pt-2">
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? (
@@ -206,6 +243,7 @@ export function AuthDialog() {
               onClick={() => {
                 setIsRegister(!isRegister);
                 setErrors({});
+                setLoginError(null);
               }}
               disabled={loading}
             >

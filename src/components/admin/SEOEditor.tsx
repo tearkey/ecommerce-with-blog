@@ -1,350 +1,270 @@
-
-import React from 'react';
-import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { SEOMetadata } from "@/types/seo";
-
-interface SEOEditorProps {
-  initialData?: Partial<SEOMetadata>;
-  onSave: (data: SEOMetadata) => void;
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SEOMetadata } from "@/types/seo";
 
 const seoFormSchema = z.object({
-  title: z.string().min(1, "Title is required").max(70, "Title should be 70 characters or less"),
-  description: z.string().max(160, "Description should be 160 characters or less"),
-  keywords: z.string()
-    .transform((val) => val.split(',').map(k => k.trim()).filter(Boolean)),
-  ogTitle: z.string().max(65, "Open Graph title should be 65 characters or less").optional(),
-  ogDescription: z.string().max(155, "Open Graph description should be 155 characters or less").optional(),
-  ogImage: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  twitterTitle: z.string().max(65, "Twitter title should be 65 characters or less").optional(),
-  twitterDescription: z.string().max(155, "Twitter description should be 155 characters or less").optional(),
-  twitterImage: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  canonicalUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  noIndex: z.boolean().default(false),
-  structuredData: z.string().optional()
-    .refine(
-      val => {
-        if (!val || val.trim() === '') return true;
-        try {
-          JSON.parse(val);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      { message: "Invalid JSON format" }
-    ),
+  title: z.string().min(5, {
+    message: "Title must be at least 5 characters.",
+  }).max(60, {
+    message: "Title should not exceed 60 characters for optimal SEO.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }).max(160, {
+    message: "Description should not exceed 160 characters for optimal SEO.",
+  }),
+  keywords: z.union([
+    z.string(),
+    z.array(z.string())
+  ]).transform(val => 
+    typeof val === 'string' 
+      ? val.split(',').map(k => k.trim()).filter(Boolean) 
+      : val
+  ),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
+  ogImage: z.string().url().optional().or(z.literal('')),
+  twitterCard: z.enum(["summary", "summary_large_image", "app", "player"]).default("summary"),
+  canonicalUrl: z.string().url().optional().or(z.literal('')),
 });
 
-type SeoFormValues = z.infer<typeof seoFormSchema>;
+interface SEOEditorProps {
+  initialData?: SEOMetadata;
+  onSubmit: (data: SEOMetadata) => void;
+  isLoading?: boolean;
+}
 
-const SEOEditor = ({ initialData = {}, onSave }: SEOEditorProps) => {
-  const form = useForm<SeoFormValues>({
+const SEOEditor: React.FC<SEOEditorProps> = ({ 
+  initialData, 
+  onSubmit,
+  isLoading = false
+}) => {
+  const form = useForm<z.infer<typeof seoFormSchema>>({
     resolver: zodResolver(seoFormSchema),
     defaultValues: {
-      title: initialData.title || "",
-      description: initialData.description || "",
-      // Convert array to comma-separated string for form input
-      keywords: initialData.keywords ? initialData.keywords.join(", ") : "",
-      ogTitle: initialData.ogTitle || "",
-      ogDescription: initialData.ogDescription || "",
-      ogImage: initialData.ogImage || "",
-      twitterTitle: initialData.twitterTitle || "",
-      twitterDescription: initialData.twitterDescription || "",
-      twitterImage: initialData.twitterImage || "",
-      canonicalUrl: initialData.canonicalUrl || "",
-      noIndex: initialData.noIndex || false,
-      structuredData: initialData.structuredData || "",
+      title: initialData?.title || "",
+      description: initialData?.description || "",
+      keywords: initialData?.keywords || [],
+      ogTitle: initialData?.ogTitle || "",
+      ogDescription: initialData?.ogDescription || "",
+      ogImage: initialData?.ogImage || "",
+      twitterCard: initialData?.twitterCard || "summary",
+      canonicalUrl: initialData?.canonicalUrl || "",
     },
   });
 
-  function onSubmit(values: SeoFormValues) {
-    onSave({
+  const handleSubmit = (values: z.infer<typeof seoFormSchema>) => {
+    onSubmit({
       title: values.title,
-      description: values.description || "",
-      // The transformed value from the schema should already be a string[]
-      keywords: values.keywords as unknown as string[],
-      ogTitle: values.ogTitle,
-      ogDescription: values.ogDescription,
-      ogImage: values.ogImage,
-      twitterTitle: values.twitterTitle,
-      twitterDescription: values.twitterDescription,
-      twitterImage: values.twitterImage,
-      canonicalUrl: values.canonicalUrl,
-      noIndex: values.noIndex,
-      structuredData: values.structuredData,
+      description: values.description,
+      keywords: typeof values.keywords === 'string' 
+        ? values.keywords.split(',').map(k => k.trim()).filter(Boolean) 
+        : values.keywords,
+      ogTitle: values.ogTitle || values.title,
+      ogDescription: values.ogDescription || values.description,
+      ogImage: values.ogImage || "",
+      twitterCard: values.twitterCard,
+      canonicalUrl: values.canonicalUrl || "",
     });
-  }
+  };
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <CardTitle>SEO Settings</CardTitle>
-        <CardDescription>
-          Optimize your content for search engines
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <Tabs defaultValue="basic">
-              <TabsList className="mb-4">
-                <TabsTrigger value="basic">Basic SEO</TabsTrigger>
-                <TabsTrigger value="social">Social Media</TabsTrigger>
-                <TabsTrigger value="advanced">Advanced</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="basic" className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SEO Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter SEO title" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        {field.value.length}/70 characters
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Meta Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter meta description" 
-                          className="resize-none" 
-                          rows={3} 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {field.value.length}/160 characters
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="keywords"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Keywords</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter keywords separated by commas" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter keywords separated by commas
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
-
-              <TabsContent value="social" className="space-y-4">
-                <div className="border-b pb-4 mb-4">
-                  <h4 className="font-semibold mb-2">Open Graph (Facebook, LinkedIn)</h4>
-                  
-                  <FormField
-                    control={form.control}
-                    name="ogTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>OG Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Open Graph title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="ogDescription"
-                    render={({ field }) => (
-                      <FormItem className="mt-4">
-                        <FormLabel>OG Description</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Open Graph description" 
-                            className="resize-none" 
-                            rows={2} 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="ogImage"
-                    render={({ field }) => (
-                      <FormItem className="mt-4">
-                        <FormLabel>OG Image URL</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://example.com/image.jpg" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Recommended size: 1200x630 pixels
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Twitter Card</h4>
-                  
-                  <FormField
-                    control={form.control}
-                    name="twitterTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Twitter Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Twitter title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="twitterDescription"
-                    render={({ field }) => (
-                      <FormItem className="mt-4">
-                        <FormLabel>Twitter Description</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Twitter description" 
-                            className="resize-none" 
-                            rows={2} 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="twitterImage"
-                    render={({ field }) => (
-                      <FormItem className="mt-4">
-                        <FormLabel>Twitter Image URL</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://example.com/image.jpg" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Recommended size: 1200x600 pixels
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="advanced" className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="canonicalUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Canonical URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://example.com/page" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Set this if this page is a duplicate of another page
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="noIndex"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>No Index</FormLabel>
-                        <FormDescription>
-                          Prevent search engines from indexing this page
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="structuredData"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Structured Data (JSON-LD)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder='{"@context": "https://schema.org", "@type": "Article", ...}' 
-                          className="font-mono text-sm h-36"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter valid JSON-LD schema markup
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
-            </Tabs>
-
-            <Button type="submit">Save SEO Settings</Button>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Meta Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Page Title" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Recommended length: 50-60 characters
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Meta Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Brief description of the page content" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Recommended length: 150-160 characters
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="keywords"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Keywords</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="keyword1, keyword2, keyword3" 
+                      value={Array.isArray(field.value) ? field.value.join(', ') : field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Comma-separated keywords relevant to the content
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-medium mb-4">Open Graph Settings</h3>
+              
+              <FormField
+                control={form.control}
+                name="ogTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>OG Title (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Title for social media sharing" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      If left empty, the meta title will be used
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="ogDescription"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>OG Description (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Description for social media sharing" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      If left empty, the meta description will be used
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="ogImage"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>OG Image URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/image.jpg" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Image to display when shared on social media
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-medium mb-4">Additional Settings</h3>
+              
+              <FormField
+                control={form.control}
+                name="twitterCard"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Twitter Card Type</FormLabel>
+                    <FormControl>
+                      <select
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        {...field}
+                      >
+                        <option value="summary">Summary</option>
+                        <option value="summary_large_image">Summary with Large Image</option>
+                        <option value="app">App</option>
+                        <option value="player">Player</option>
+                      </select>
+                    </FormControl>
+                    <FormDescription>
+                      Controls how content appears when shared on Twitter
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="canonicalUrl"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Canonical URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/page" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      The preferred URL for this content if multiple URLs exist
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save SEO Settings"}
+            </Button>
           </form>
         </Form>
       </CardContent>
