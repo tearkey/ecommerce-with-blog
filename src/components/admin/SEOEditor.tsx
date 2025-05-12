@@ -1,3 +1,4 @@
+
 import React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -72,13 +73,15 @@ const SEOEditor: React.FC<SEOEditorProps> = ({
     onSubmit({
       title: values.title,
       description: values.description,
-      keywords: typeof values.keywords === 'string' 
-        ? values.keywords.split(',').map(k => k.trim()).filter(Boolean) 
-        : values.keywords,
+      keywords: Array.isArray(values.keywords) 
+        ? values.keywords 
+        : values.keywords.split(',').map(k => k.trim()).filter(Boolean),
       ogTitle: values.ogTitle || values.title,
       ogDescription: values.ogDescription || values.description,
       ogImage: values.ogImage || "",
       twitterCard: values.twitterCard,
+      twitterTitle: values.ogTitle || values.title,
+      twitterDescription: values.ogDescription || values.description,
       canonicalUrl: values.canonicalUrl || "",
     });
   };

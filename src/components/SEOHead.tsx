@@ -21,6 +21,7 @@ const SEOHead = ({ metadata, type = 'website', url, siteName = 'TechStore' }: SE
     twitterTitle,
     twitterDescription,
     twitterImage,
+    twitterCard,
     canonicalUrl,
     noIndex,
     structuredData
@@ -64,7 +65,7 @@ const SEOHead = ({ metadata, type = 'website', url, siteName = 'TechStore' }: SE
       {ogImage && <meta property="og:image" content={ogImage} />}
       
       {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:card" content={twitterCard || "summary_large_image"} />
       {(twitterTitle || ogTitle || title) && (
         <meta name="twitter:title" content={twitterTitle || ogTitle || title} />
       )}
