@@ -40,9 +40,11 @@ const seoFormSchema = z.object({
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
   ogImage: z.string().url().optional().or(z.literal('')),
-  twitterCard: z.enum(["summary", "summary_large_image", "app", "player"]).default("summary"),
+  twitterCard: z.enum(["summary", "summary_large_image", "app", "player"]).default("summary_large_image"),
   canonicalUrl: z.string().url().optional().or(z.literal('')),
 });
+
+type TwitterCardType = "summary" | "summary_large_image" | "app" | "player";
 
 interface SEOEditorProps {
   initialData?: SEOMetadata;
@@ -64,18 +66,17 @@ const SEOEditor: React.FC<SEOEditorProps> = ({
       ogTitle: initialData?.ogTitle || "",
       ogDescription: initialData?.ogDescription || "",
       ogImage: initialData?.ogImage || "",
-      twitterCard: initialData?.twitterCard || "summary",
+      twitterCard: (initialData?.twitterCard as TwitterCardType) || "summary_large_image",
       canonicalUrl: initialData?.canonicalUrl || "",
     },
   });
 
   const handleSubmit = (values: z.infer<typeof seoFormSchema>) => {
+    // Since we're using z.transform for keywords, values.keywords should always be an array at this point
     onSubmit({
       title: values.title,
       description: values.description,
-      keywords: Array.isArray(values.keywords) 
-        ? values.keywords 
-        : values.keywords.split(',').map(k => k.trim()).filter(Boolean),
+      keywords: values.keywords as string[], // Type assertion since we know it's transformed to string[]
       ogTitle: values.ogTitle || values.title,
       ogDescription: values.ogDescription || values.description,
       ogImage: values.ogImage || "",

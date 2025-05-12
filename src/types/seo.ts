@@ -9,7 +9,7 @@ export interface SEOMetadata {
   twitterTitle?: string;
   twitterDescription?: string;
   twitterImage?: string;
-  twitterCard?: string;
+  twitterCard?: "summary" | "summary_large_image" | "app" | "player";
   canonicalUrl?: string;
   noIndex?: boolean;
   structuredData?: string; // JSON-LD structured data as string
