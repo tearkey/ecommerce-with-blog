@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,47 +76,9 @@ const Admin = () => {
     setSelectedPost(undefined);
   };
   
-  // If user is not logged in, show dedicated admin login page
+  // If user is not logged in, show dedicated admin login page using full page AuthDialog
   if (!user) {
-    return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-6 bg-primary text-white">
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Lock className="h-5 w-5" /> Admin Login
-              </h1>
-              <p className="mt-1 text-primary-foreground">Please sign in to access the admin panel</p>
-            </div>
-            
-            <div className="p-6 space-y-6">
-              <Alert className="bg-blue-50 border-blue-200">
-                <AlertDescription className="space-y-1">
-                  <p>For demo purposes:</p>
-                  <p className="font-medium">Email: <span className="font-mono">tearkey@admin.com</span></p>
-                  <p className="font-medium">Password: <span className="font-mono">tearkey</span></p>
-                </AlertDescription>
-              </Alert>
-              
-              <div className="flex flex-col gap-4">
-                <AuthDialog />
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="bg-white px-2 text-sm text-gray-500">or</span>
-                  </div>
-                </div>
-                <Button variant="outline" asChild>
-                  <Link to="/">Return to Website</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <AuthDialog isFullPage={true} />;
   }
   
   if (supabaseAvailable === false) {

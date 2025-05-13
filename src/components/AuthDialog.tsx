@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +28,7 @@ const registerSchema = loginSchema.extend({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
 });
 
-export function AuthDialog() {
+export function AuthDialog({ isFullPage = false }: { isFullPage?: boolean }) {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState<AuthFormData>({
     email: "",
@@ -37,7 +36,7 @@ export function AuthDialog() {
     name: "",
   });
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(isFullPage);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user, signOut } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -53,6 +52,11 @@ export function AuthDialog() {
     const redirect = params.get('redirect');
     if (redirect) {
       setRedirectPath(redirect);
+    }
+    
+    // If we're on the admin page directly, set redirect to /admin
+    if (location.pathname === '/admin' && !redirect) {
+      setRedirectPath('/admin');
     }
   }, [location]);
 
@@ -127,7 +131,11 @@ export function AuthDialog() {
           navigate(redirectPath);
         }
       }
-      setOpen(false);
+      
+      // Only close dialog if not in full page mode
+      if (!isFullPage) {
+        setOpen(false);
+      }
     } catch (error) {
       console.error("Auth error:", error);
       setLoginError(error instanceof Error ? error.message : "Failed to authenticate. Try using the demo credentials.");
@@ -137,6 +145,23 @@ export function AuthDialog() {
   };
 
   if (user) {
+    // If user is logged in and in full page mode, redirect to admin
+    if (isFullPage) {
+      useEffect(() => {
+        if (redirectPath) {
+          navigate(redirectPath);
+        } else {
+          navigate('/admin');
+        }
+      }, []);
+      
+      return (
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      );
+    }
+    
     return (
       <div className="flex items-center gap-2">
         <span className="hidden md:inline text-sm text-muted-foreground">
@@ -150,6 +175,101 @@ export function AuthDialog() {
     );
   }
 
+  // Full page login form
+  if (isFullPage) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="p-6 bg-primary text-white">
+              <h1 className="text-2xl font-bold">Admin Login</h1>
+              <p className="mt-1 text-primary-foreground">Sign in to access the admin panel</p>
+            </div>
+            
+            <div className="p-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className={errors.email ? "text-destructive" : ""}>
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={errors.email ? "border-destructive" : ""}
+                  />
+                  {errors.email && (
+                    <p className="text-destructive text-sm">{errors.email}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password" className={errors.password ? "text-destructive" : ""}>
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={errors.password ? "border-destructive" : ""}
+                  />
+                  {errors.password && (
+                    <p className="text-destructive text-sm">{errors.password}</p>
+                  )}
+                </div>
+
+                {loginError && (
+                  <Alert className="bg-destructive/10 text-destructive">
+                    <AlertDescription>{loginError}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Alert className="bg-blue-50 border-blue-200">
+                  <Info className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    For demo: Use <strong>"tearkey@admin.com"</strong> with password <strong>"tearkey"</strong>
+                    <Button 
+                      variant="link" 
+                      onClick={fillDemoCredentials} 
+                      className="p-0 h-auto ml-1 text-xs underline"
+                      type="button"
+                    >
+                      Fill credentials
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+
+                <div className="pt-2">
+                  <Button type="submit" disabled={loading} className="w-full">
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing In...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </Button>
+                </div>
+                
+                <div className="text-center mt-4">
+                  <Button variant="link" asChild className="p-0">
+                    <a href="/">Return to Website</a>
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular dialog version for non-fullpage
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -187,6 +307,7 @@ export function AuthDialog() {
               )}
             </div>
           )}
+          
           <div className="space-y-2">
             <Label htmlFor="email" className={errors.email ? "text-destructive" : ""}>
               Email
