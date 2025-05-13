@@ -17,7 +17,7 @@ import type { BlogPost } from "@/types/blog";
 import { AuthDialog } from "@/components/AuthDialog";
 
 const Admin = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [supabaseAvailable, setSupabaseAvailable] = useState<boolean | null>(null);
@@ -41,7 +41,7 @@ const Admin = () => {
 
   // Redirect non-admin users away
   useEffect(() => {
-    if (user && !isAdmin) {
+    if (!loading && user && !isAdmin) {
       toast({
         title: "Access Denied",
         description: "You don't have permission to access the admin area",
@@ -49,7 +49,7 @@ const Admin = () => {
       });
       navigate("/");
     }
-  }, [user, isAdmin, navigate, toast]);
+  }, [user, isAdmin, navigate, toast, loading]);
 
   const handleEditPost = (post: BlogPost) => {
     setSelectedPost(post);
@@ -76,6 +76,18 @@ const Admin = () => {
     setAdminView("list");
     setSelectedPost(undefined);
   };
+  
+  // Show loading indicator while auth state is being determined
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading admin panel...</p>
+        </div>
+      </div>
+    );
+  }
   
   // If user is not logged in, show dedicated admin login page
   if (!user) {
@@ -253,8 +265,8 @@ function AdminLoginForm() {
         description: "Welcome to the admin dashboard",
       });
     } catch (err) {
-      setError("Failed to log in. Please check your credentials.");
       console.error("Login error:", err);
+      setError("Failed to log in. Please check your credentials.");
     } finally {
       setLoading(false);
     }

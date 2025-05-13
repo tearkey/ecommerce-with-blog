@@ -1,7 +1,8 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -74,6 +75,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setIsAdmin(false);
       }
+
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -81,6 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      setLoading(true);
+      
       // Special case for demo admin login when Supabase is not available
       if (demoMode && email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
         // Use demo admin user
@@ -90,6 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Demo Admin Login Successful",
           description: "You are now logged in as an administrator in demo mode",
         });
+        setLoading(false);
         return;
       }
       
@@ -133,6 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   title: "Demo Admin Login Successful",
                   description: "You are now logged in as an administrator in demo mode",
                 });
+                setLoading(false);
                 return;
               }
             } else {
@@ -145,10 +152,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   title: "Demo Admin Login Successful",
                   description: "You are now logged in as an administrator in demo mode",
                 });
+                setLoading(false);
+                return;
               } else {
                 throw error;
               }
-              return;
             }
           }
           
@@ -169,9 +177,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               description: "You are now logged in as an administrator in demo mode",
             });
           } else {
+            setLoading(false);
             throw error;
           }
         }
+        setLoading(false);
         return;
       }
 
@@ -184,11 +194,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Sign in error:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, name: string) => {
     try {
+      setLoading(true);
       if (demoMode) {
         toast({
           title: "Demo Mode",
@@ -210,11 +223,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Sign up error:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
+      setLoading(true);
       // In demo mode, just clear the user state
       if (demoMode) {
         setUser(null);
@@ -234,6 +250,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Sign out error:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
