@@ -14,6 +14,7 @@ import AdminBlogList from "@/components/admin/AdminBlogList";
 import BlogEditor from "@/components/admin/BlogEditor";
 import ThemeBuilder from "@/components/admin/ThemeBuilder";
 import type { BlogPost } from "@/types/blog";
+import { AuthDialog } from "@/components/AuthDialog";
 
 const Admin = () => {
   const { user, isAdmin } = useAuth();
@@ -38,13 +39,8 @@ const Admin = () => {
     checkSupabase();
   }, []);
 
-  // Redirect non-admin users to login
+  // Redirect non-admin users away
   useEffect(() => {
-    if (!user) {
-      // Do nothing, we'll show the login prompt below
-      return;
-    }
-    
     if (user && !isAdmin) {
       toast({
         title: "Access Denied",
@@ -81,36 +77,45 @@ const Admin = () => {
     setSelectedPost(undefined);
   };
   
-  // If user is not logged in, show login prompt
+  // If user is not logged in, show dedicated admin login page
   if (!user) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" /> Admin Area
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert>
-              <AlertTitle>Authentication Required</AlertTitle>
-              <AlertDescription className="space-y-2">
-                <p>You need to be logged in as an admin to access this area.</p>
-                <div className="text-sm bg-blue-50 p-2 rounded border border-blue-200 mt-2">
-                  <strong>For demo:</strong> Use "tearkey@admin.com" with password "tearkey"
-                </div>
-              </AlertDescription>
-            </Alert>
-            <div className="flex justify-between">
-              <Button variant="outline" asChild>
-                <Link to="/">Back to Homepage</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/">Sign In</Link>
-              </Button>
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="p-6 bg-primary text-white">
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Lock className="h-5 w-5" /> Admin Login
+              </h1>
+              <p className="mt-1 text-primary-foreground">Please sign in to access the admin panel</p>
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="p-6 space-y-6">
+              <Alert className="bg-blue-50 border-blue-200">
+                <AlertDescription className="space-y-1">
+                  <p>For demo purposes:</p>
+                  <p className="font-medium">Email: <span className="font-mono">tearkey@admin.com</span></p>
+                  <p className="font-medium">Password: <span className="font-mono">tearkey</span></p>
+                </AlertDescription>
+              </Alert>
+              
+              <div className="flex flex-col gap-4">
+                <AuthDialog />
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-white px-2 text-sm text-gray-500">or</span>
+                  </div>
+                </div>
+                <Button variant="outline" asChild>
+                  <Link to="/">Return to Website</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

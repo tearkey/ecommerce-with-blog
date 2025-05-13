@@ -17,6 +17,7 @@ import type { AuthFormData } from "@/types/auth";
 import { z } from "zod";
 import { Loader2, UserCircle, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -41,6 +42,19 @@ export function AuthDialog() {
   const { signIn, signUp, user, signOut } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loginError, setLoginError] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
+
+  // Detect if we're coming from admin page
+  useEffect(() => {
+    // Store the path we should redirect to after login
+    const params = new URLSearchParams(location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      setRedirectPath(redirect);
+    }
+  }, [location]);
 
   // Auto-fill admin credentials for easy demo access
   const fillDemoCredentials = () => {
@@ -107,6 +121,11 @@ export function AuthDialog() {
           title: "Login Successful",
           description: "Welcome back to TechStore!",
         });
+        
+        // Handle redirection to admin if needed
+        if (redirectPath) {
+          navigate(redirectPath);
+        }
       }
       setOpen(false);
     } catch (error) {

@@ -4,7 +4,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Search,
-  Menu
+  Menu,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartSheet } from "@/components/CartSheet";
@@ -13,6 +14,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
+import { useAuth } from "@/context/AuthContext";
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -28,6 +30,7 @@ const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSearching, setIsSearching] = useState(false);
+  const { user, isAdmin } = useAuth();
 
   // Don't show breadcrumbs on blog post pages since they have custom breadcrumbs
   const isBlogPost = location.pathname.startsWith('/blog/') && location.pathname !== '/blog/';
@@ -103,8 +106,28 @@ const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
               <Link to="/blog">
                 <Button variant="outline">Blog</Button>
               </Link>
-              <CartSheet />
-              <AuthDialog />
+              
+              {/* Admin link - only show if user is admin */}
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="outline" className="flex items-center gap-1">
+                    <Shield className="h-4 w-4" />
+                    <span>Admin</span>
+                  </Button>
+                </Link>
+              )}
+              
+              {/* If not logged in and on the admin page, we show a special login button */}
+              {!user && location.pathname === "/admin" ? (
+                <Link to="/admin">
+                  <Button>Admin Login</Button>
+                </Link>
+              ) : (
+                <>
+                  <CartSheet />
+                  <AuthDialog />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -137,7 +160,8 @@ const PageLayout = ({ children, showBreadcrumbs = true }: PageLayoutProps) => {
               <ul className="space-y-2 text-muted-foreground">
                 <li><Link to="/offers" className="hover:underline">Special Offers</Link></li>
                 <li><Link to="/new-products" className="hover:underline">New Products</Link></li>
-                <li><Link to="/support" className="hover:underline">Support Center</Link></li>
+                <li><Link to="/support" className="hover:underline">Support</Link></li>
+                <li><Link to="/admin" className="hover:underline">Admin</Link></li>
               </ul>
             </div>
             <div>
