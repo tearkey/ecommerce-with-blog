@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
@@ -240,7 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isAdmin }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }
