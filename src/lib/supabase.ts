@@ -1,15 +1,9 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database';
 
 // Configuration
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Check if the environment variables are defined
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase environment variables are missing. Using placeholder values for development.');
-}
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Create a Supabase client
 export const supabase = createClient<Database>(
@@ -19,18 +13,30 @@ export const supabase = createClient<Database>(
 
 // Helper to check if Supabase is properly configured
 export const isSupabaseConfigured = async (): Promise<boolean> => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase environment variables are missing.');
+    return false;
+  }
+
   try {
-    // Try a simple query to check if connection works
-    const { data, error } = await supabase
-      .from('products')
-      .select('id')
-      .limit(1);
+    // Try a simple health check query
+    const { error } = await supabase.from('products').select('count');
     
-    if (error && error.message.includes('Invalid API')) {
+    // If we get an auth error, the keys might be wrong but Supabase is reachable
+    if (error && (error.message.includes('JWT') || error.message.includes('auth'))) {
+      console.warn('Supabase keys might be incorrect, but service is reachable');
+      return true;
+    }
+    
+    // If we get other errors, check if they're related to connection
+    if (error && (error.message.includes('fetch') || error.message.includes('network'))) {
+      console.error('Supabase connection error:', error.message);
       return false;
     }
+    
     return true;
   } catch (err) {
+    console.error('Error checking Supabase configuration:', err);
     return false;
   }
 };

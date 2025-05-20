@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Lock, FileText, Package, Users, Settings, Layout } from "lucide-react";
+import { Lock, FileText, Package, Users, Settings, Layout, Database } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import SupabaseConfig from "@/components/SupabaseConfig";
@@ -14,10 +13,10 @@ import AdminBlogList from "@/components/admin/AdminBlogList";
 import BlogEditor from "@/components/admin/BlogEditor";
 import ThemeBuilder from "@/components/admin/ThemeBuilder";
 import type { BlogPost } from "@/types/blog";
-import { AuthDialog } from "@/components/AuthDialog";
 
+// Keep the Admin component implementation the same, but with a few modifications
 const Admin = () => {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, demoMode } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [supabaseAvailable, setSupabaseAvailable] = useState<boolean | null>(null);
@@ -25,11 +24,20 @@ const Admin = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | undefined>(undefined);
   const [activeTab, setActiveTab] = useState("blog");
   
+  // Check Supabase configuration on component mount
   useEffect(() => {
     const checkSupabase = async () => {
       try {
         const isConfigured = await isSupabaseConfigured();
         setSupabaseAvailable(isConfigured);
+        
+        if (!isConfigured && !demoMode) {
+          toast({
+            title: "Supabase Connection Failed",
+            description: "Unable to connect to Supabase. Please configure your database connection.",
+            variant: "destructive"
+          });
+        }
       } catch (error) {
         setSupabaseAvailable(false);
         console.error("Error checking Supabase configuration:", error);
@@ -51,6 +59,7 @@ const Admin = () => {
     }
   }, [user, isAdmin, navigate, toast, loading]);
 
+  // Blog post handling functions
   const handleEditPost = (post: BlogPost) => {
     setSelectedPost(post);
     setAdminView("edit");
@@ -96,7 +105,7 @@ const Admin = () => {
         <div className="w-full max-w-md">
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="p-6 bg-primary text-white">
-              <h1 className="text-2xl font-bold">WordPress-Style Admin Login</h1>
+              <h1 className="text-2xl font-bold">Admin Login</h1>
               <p className="mt-1 text-primary-foreground">Sign in to access the admin dashboard</p>
             </div>
             
@@ -109,27 +118,37 @@ const Admin = () => {
     );
   }
   
-  if (supabaseAvailable === false) {
+  // Show Supabase configuration page if connection failed
+  if (supabaseAvailable === false && !demoMode) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
         <Card className="w-full max-w-3xl">
           <CardHeader>
-            <CardTitle>Admin Panel Configuration Required</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Database Configuration Required
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <Alert className="mb-6">
-              <AlertTitle>Supabase Not Configured</AlertTitle>
+            <Alert className="mb-6" variant="destructive">
+              <AlertTitle>Supabase Connection Error</AlertTitle>
               <AlertDescription>
-                The admin panel requires a proper Supabase connection to manage content.
-                Please configure your Supabase settings below.
+                Unable to connect to Supabase. Please check your Supabase configuration below.
               </AlertDescription>
             </Alert>
+            <p className="mb-6">
+              To use the full functionality of the admin panel, please configure your Supabase connection.
+              You'll need your Supabase URL and anon key from your Supabase project settings.
+            </p>
             <SupabaseConfig />
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  // Show demo mode warning if in demo mode
+  const showDemoWarning = demoMode && !loading;
 
   // Admin panel content management interface
   if (adminView === "edit" || adminView === "new") {
@@ -139,6 +158,21 @@ const Admin = () => {
           <h1 className="text-2xl font-bold mb-6">
             {adminView === "edit" ? "Edit Blog Post" : "Create New Blog Post"}
           </h1>
+          {showDemoWarning && (
+            <Alert className="mb-6" variant="warning">
+              <AlertTitle>Demo Mode Active</AlertTitle>
+              <AlertDescription>
+                You are working in demo mode. Changes won't be saved to a real database.
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-blue-600 font-medium" 
+                  onClick={() => setActiveTab("settings")}
+                >
+                  Configure Supabase
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           <BlogEditor 
             post={selectedPost} 
             onCancel={handleCancel} 
@@ -149,6 +183,7 @@ const Admin = () => {
     );
   }
 
+  // Main admin dashboard view
   return (
     <div className="min-h-screen bg-background">
       <div className="p-6 max-w-7xl mx-auto">
@@ -161,6 +196,16 @@ const Admin = () => {
             <Link to="/">View Website</Link>
           </Button>
         </div>
+
+        {showDemoWarning && (
+          <Alert className="mb-6" variant="warning">
+            <AlertTitle>Demo Mode Active</AlertTitle>
+            <AlertDescription>
+              You are currently in demo mode because Supabase connection failed. Some features may be limited.
+              Go to Settings tab to configure your Supabase connection.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Tabs defaultValue="blog" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-6">
@@ -222,16 +267,20 @@ const Admin = () => {
           <TabsContent value="settings">
             <Card>
               <CardHeader>
-                <CardTitle>Site Settings</CardTitle>
+                <CardTitle>Database Configuration</CardTitle>
               </CardHeader>
               <CardContent>
-                <Alert>
-                  <AlertDescription>
-                    Site settings functionality will be implemented soon.
-                  </AlertDescription>
-                </Alert>
-                <div className="mt-6">
+                <div className="mb-6">
                   <SupabaseConfig />
+                </div>
+                
+                <div className="mt-8">
+                  <h3 className="text-lg font-medium mb-4">Other Settings</h3>
+                  <Alert>
+                    <AlertDescription>
+                      Additional site settings functionality will be implemented soon.
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </CardContent>
             </Card>
@@ -248,8 +297,7 @@ function AdminLoginForm() {
   const [password, setPassword] = useState("tearkey");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
-  const navigate = useNavigate();
+  const { signIn, demoMode } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -259,10 +307,11 @@ function AdminLoginForm() {
     
     try {
       await signIn(email, password);
-      // After successful login, the page will re-render with admin dashboard
       toast({
         title: "Login Successful",
-        description: "Welcome to the admin dashboard",
+        description: demoMode 
+          ? "Welcome to the admin dashboard (Demo Mode)" 
+          : "Welcome to the admin dashboard",
       });
     } catch (err) {
       console.error("Login error:", err);

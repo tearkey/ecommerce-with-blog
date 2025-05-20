@@ -1,6 +1,5 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,6 +10,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
+  demoMode: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,50 +37,93 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [demoMode, setDemoMode] = useState(false);
+  const [connectionChecked, setConnectionChecked] = useState(false);
   const { toast } = useToast();
 
+  // Initial check for Supabase configuration
   useEffect(() => {
-    // Check if we can connect to Supabase
-    const checkSupabase = async () => {
+    const checkSupabaseConnection = async () => {
       try {
+        const isConfigured = await isSupabaseConfigured();
+        if (!isConfigured) {
+          console.warn("Supabase not properly configured, enabling demo mode");
+          setDemoMode(true);
+          toast({
+            title: "Demo Mode Activated",
+            description: "Supabase connection failed. Using demo mode with limited functionality.",
+            variant: "warning",
+          });
+        } else {
+          setDemoMode(false);
+        }
+      } catch (error) {
+        console.error("Error checking Supabase:", error);
+        setDemoMode(true);
+      } finally {
+        setConnectionChecked(true);
+      }
+    };
+    
+    checkSupabaseConnection();
+  }, []);
+
+  // Set up auth state monitoring after checking connection
+  useEffect(() => {
+    if (!connectionChecked) return;
+    
+    const initializeAuth = async () => {
+      setLoading(true);
+      
+      if (demoMode) {
+        // In demo mode, we just initialize with no user
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        // Get session from Supabase
         const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        
+        setUser(currentUser);
+        
+        // Check if current user is admin
+        if (currentUser?.email === ADMIN_EMAIL) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        // If we can't connect to Supabase for auth, enable demo mode
+        setDemoMode(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    initializeAuth();
+    
+    // Set up auth state change listener
+    if (!demoMode) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         
         // Check if current user is admin
         if (currentUser?.email === ADMIN_EMAIL) {
           setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
         }
-        setDemoMode(false);
-      } catch (error) {
-        console.log("Supabase connection failed, enabling demo mode");
-        setDemoMode(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSupabase();
-
-    // Listen for changes on auth state if not in demo mode
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (demoMode) return;
+      });
       
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      
-      // Check if current user is admin
-      if (currentUser?.email === ADMIN_EMAIL) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [demoMode]);
+      return () => {
+        subscription.unsubscribe();
+      };
+    }
+  }, [connectionChecked, demoMode]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -99,100 +142,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       
-      // If not in demo mode or not the demo admin, try normal Supabase login
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-          
-          if (error) {
-            // If the admin account doesn't exist yet in Supabase, create it
-            if (error.message.includes("Invalid login credentials")) {
-              // Try to create the admin account
-              const { error: signUpError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                  data: {
-                    name: "Admin User",
-                    role: "admin",
-                  },
-                },
-              });
-              
-              if (signUpError) throw signUpError;
-              
-              // Try login again
-              const { error: retryError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-              });
-              
-              if (retryError) {
-                // If we still can't login, switch to demo mode
-                setDemoMode(true);
-                setUser(DEMO_ADMIN_USER as unknown as User);
-                setIsAdmin(true);
-                toast({
-                  title: "Demo Admin Login Successful",
-                  description: "You are now logged in as an administrator in demo mode",
-                });
-                setLoading(false);
-                return;
-              }
-            } else {
-              // Handle other errors - if Supabase can't connect, use demo mode
-              setDemoMode(true);
-              if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-                setUser(DEMO_ADMIN_USER as unknown as User);
-                setIsAdmin(true);
-                toast({
-                  title: "Demo Admin Login Successful",
-                  description: "You are now logged in as an administrator in demo mode",
-                });
-                setLoading(false);
-                return;
-              } else {
-                throw error;
-              }
-            }
-          }
-          
-          setIsAdmin(true);
-          toast({
-            title: "Admin Login Successful",
-            description: "You are now logged in as an administrator",
-          });
-        } catch (error) {
-          // If there's an error with Supabase, fall back to demo mode
-          console.error("Sign in error with Supabase, using demo mode:", error);
-          setDemoMode(true);
-          if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-            setUser(DEMO_ADMIN_USER as unknown as User);
-            setIsAdmin(true);
-            toast({
-              title: "Demo Admin Login Successful",
-              description: "You are now logged in as an administrator in demo mode",
-            });
-          } else {
-            setLoading(false);
-            throw error;
-          }
-        }
-        setLoading(false);
-        return;
-      }
-
-      // Regular user login
-      const { error } = await supabase.auth.signInWithPassword({
+      // Regular Supabase login
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (error) throw error;
+      
+      if (error) {
+        // If admin credentials are used but the account doesn't exist in Supabase
+        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD && error.message.includes("Invalid login credentials")) {
+          try {
+            // Create the admin account
+            const { error: signUpError } = await supabase.auth.signUp({
+              email,
+              password,
+              options: {
+                data: {
+                  name: "Admin User",
+                  role: "admin",
+                }
+              }
+            });
+            
+            if (signUpError) throw signUpError;
+            
+            // Try login again
+            const { error: retryError } = await supabase.auth.signInWithPassword({
+              email,
+              password
+            });
+            
+            if (retryError) throw retryError;
+          } catch (createError) {
+            console.error("Failed to create admin account:", createError);
+            // Fall back to demo mode for admin
+            setDemoMode(true);
+            setUser(DEMO_ADMIN_USER as unknown as User);
+            setIsAdmin(true);
+            toast({
+              title: "Demo Admin Login",
+              description: "Logged in as admin in demo mode since Supabase account creation failed.",
+            });
+            return;
+          }
+        } else {
+          // Handle other login errors
+          throw error;
+        }
+      }
+      
+      // Check if user is admin
+      if (data?.user?.email === ADMIN_EMAIL) {
+        setIsAdmin(true);
+      }
+      
+      toast({
+        title: "Login Successful",
+        description: isAdmin ? "You are logged in as an administrator" : "You are now logged in",
+      });
     } catch (error) {
       console.error("Sign in error:", error);
+      toast({
+        title: "Login Failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setLoading(false);
@@ -254,9 +268,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   };
-
+  
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isAdmin }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      signIn, 
+      signUp, 
+      signOut, 
+      isAdmin,
+      demoMode
+    }}>
       {children}
     </AuthContext.Provider>
   );
