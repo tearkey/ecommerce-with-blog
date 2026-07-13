@@ -73,7 +73,7 @@ const Contact = () => {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Partial<ContactFormData> = {};
-        error.errors.forEach(err => {
+        error.issues.forEach(err => {
           if (err.path[0]) {
             fieldErrors[err.path[0] as keyof ContactFormData] = err.message;
           }
