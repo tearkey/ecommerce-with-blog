@@ -293,8 +293,8 @@ const Admin = () => {
 
 // Create a dedicated admin login component that works directly on the admin page
 function AdminLoginForm() {
-  const [email, setEmail] = useState("tearkey@admin.com");
-  const [password, setPassword] = useState("tearkey");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { signIn, demoMode } = useAuth();
@@ -361,12 +361,6 @@ function AdminLoginForm() {
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Logging in..." : "Log In to Admin"}
         </Button>
-      </div>
-      
-      <div className="text-center mt-4 text-sm text-muted-foreground">
-        <p>Demo credentials are pre-filled for you.</p>
-        <p>Email: tearkey@admin.com</p>
-        <p>Password: tearkey</p>
       </div>
       
       <div className="text-center mt-4">
