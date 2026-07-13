@@ -25,6 +25,7 @@ import OffersPage from '@/pages/Offers';
 import NewProductsPage from '@/pages/NewProducts';
 import AdminPage from '@/pages/Admin';
 import NotFoundPage from '@/pages/NotFound';
+import OAuthConsent from '@/pages/OAuthConsent';
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ function App() {
                   <Route path="/offers" element={<OffersPage />} />
                   <Route path="/new-products" element={<NewProductsPage />} />
                   <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Router>
