@@ -14,7 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import type { AuthFormData } from "@/types/auth";
 import { z } from "zod";
-import { Loader2, UserCircle, Info } from "lucide-react";
+import { Loader2, UserCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -59,15 +59,6 @@ export function AuthDialog({ isFullPage = false }: { isFullPage?: boolean }) {
       setRedirectPath('/admin');
     }
   }, [location]);
-
-  // Auto-fill admin credentials for easy demo access
-  const fillDemoCredentials = () => {
-    setFormData({
-      email: "tearkey@admin.com",
-      password: "tearkey",
-      name: "",
-    });
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -228,21 +219,6 @@ export function AuthDialog({ isFullPage = false }: { isFullPage?: boolean }) {
                   </Alert>
                 )}
 
-                <Alert className="bg-blue-50 border-blue-200">
-                  <Info className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    For demo: Use <strong>"tearkey@admin.com"</strong> with password <strong>"tearkey"</strong>
-                    <Button 
-                      variant="link" 
-                      onClick={fillDemoCredentials} 
-                      className="p-0 h-auto ml-1 text-xs underline"
-                      type="button"
-                    >
-                      Fill credentials
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-
                 <div className="pt-2">
                   <Button type="submit" disabled={loading} className="w-full">
                     {loading ? (
@@ -340,21 +316,6 @@ export function AuthDialog({ isFullPage = false }: { isFullPage?: boolean }) {
               <p className="text-destructive text-sm">{errors.password}</p>
             )}
           </div>
-
-          <Alert className="bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4" />
-            <AlertDescription className="text-xs">
-              For demo: Use <strong>"tearkey@admin.com"</strong> with password <strong>"tearkey"</strong>
-              <Button 
-                variant="link" 
-                onClick={fillDemoCredentials} 
-                className="p-0 h-auto ml-1 text-xs underline"
-                type="button"
-              >
-                Fill credentials
-              </Button>
-            </AlertDescription>
-          </Alert>
 
           <div className="flex flex-col space-y-4 pt-2">
             <Button type="submit" disabled={loading} className="w-full">
