@@ -4,8 +4,8 @@ import { z } from "zod";
 
 function supabaseForUser(ctx: ToolContext) {
   return createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    (globalThis as any).process.env.SUPABASE_URL!,
+    (globalThis as any).process.env.SUPABASE_PUBLISHABLE_KEY!,
     {
       global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
       auth: { persistSession: false, autoRefreshToken: false },
