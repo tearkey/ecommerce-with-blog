@@ -47,7 +47,7 @@ const Admin = () => {
     checkSupabase();
   }, []);
 
-  // Redirect non-admin users away
+  // Redirect non-admin users away (server-verified via has_role RPC).
   useEffect(() => {
     if (!loading && user && !isAdmin) {
       toast({
@@ -55,7 +55,7 @@ const Admin = () => {
         description: "You don't have permission to access the admin area",
         variant: "destructive"
       });
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, [user, isAdmin, navigate, toast, loading]);
 
@@ -117,7 +117,39 @@ const Admin = () => {
       </div>
     );
   }
-  
+
+  // Hard gate: never render admin UI for non-admin users. `isAdmin` is
+  // set from the server-side `public.has_role` RPC in AuthContext, so this
+  // check cannot be bypassed by client state manipulation — the effect above
+  // also redirects them away.
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" /> Access Denied
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive">
+              <AlertTitle>Admins only</AlertTitle>
+              <AlertDescription>
+                Your account does not have the admin role. If you believe this
+                is a mistake, contact a workspace administrator.
+              </AlertDescription>
+            </Alert>
+            <div className="mt-4">
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/">Return to Website</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Show Supabase configuration page if connection failed
   if (supabaseAvailable === false && !demoMode) {
     return (
