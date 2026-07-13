@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../types/database';
 
 // Configuration
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// Create a Supabase client
-export const supabase = createClient<Database>(
+// Create a Supabase client (typed loosely; the strongly-typed client lives in
+// src/integrations/supabase/client.ts and should be preferred for new code).
+export const supabase = createClient<any>(
   supabaseUrl || 'https://your-project.supabase.co',
   supabaseAnonKey || 'your-anon-key'
 );
