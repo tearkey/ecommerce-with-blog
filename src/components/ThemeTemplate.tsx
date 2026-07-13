@@ -1,5 +1,6 @@
 
 import React from "react";
+import DOMPurify from "dompurify";
 import { useThemeBuilder } from "@/context/ThemeBuilderContext";
 import { TemplateType } from "@/types/theme";
 
@@ -18,7 +19,7 @@ const ThemeTemplate: React.FC<ThemeTemplateProps> = ({ type }) => {
   return (
     <div 
       className="theme-template" 
-      dangerouslySetInnerHTML={{ __html: template.content }} 
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.content ?? "") }} 
     />
   );
 };
