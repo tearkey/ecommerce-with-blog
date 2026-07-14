@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import PageLayout from "@/components/PageLayout";
+import PageMeta from "@/components/PageMeta";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { z } from "zod";
