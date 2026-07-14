@@ -7,6 +7,7 @@ import type { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { Link, useSearchParams } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
+import PageMeta from "@/components/PageMeta";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
