@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import DOMPurify from "dompurify";
 import PageLayout from "@/components/PageLayout";
+import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -96,6 +97,13 @@ const BlogPostPage = () => {
   
   return (
     <PageLayout showBreadcrumbs={false}>
+      <PageMeta
+        title={post.title}
+        description={post.excerpt || `${post.title} — read the full article on the TechStore blog.`}
+        path={`/blog/${post.slug}`}
+        image={post.featured_image}
+        type="article"
+      />
       <div className="container mx-auto px-4 py-8">
         {/* Custom breadcrumbs for blog posts to avoid duplication */}
         <nav aria-label="breadcrumb" className="mb-8">
