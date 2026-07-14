@@ -1,5 +1,6 @@
 
 import PageLayout from "@/components/PageLayout";
+import PageMeta from "@/components/PageMeta";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -64,6 +65,12 @@ const Index = () => {
 
   return (
     <PageLayout showBreadcrumbs={false}>
+      <PageMeta
+        title="TechStore — Laptops, PCs, Monitors & Peripherals"
+        description="Shop cutting-edge laptops, desktops, monitors, and peripherals at TechStore, and read expert reviews, guides, and news on our tech blog."
+        path="/"
+        type="website"
+      />
       {/* Show Supabase Config Component if not configured */}
       {supabaseConfigured === false && <SupabaseConfig />}
       

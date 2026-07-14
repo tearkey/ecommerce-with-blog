@@ -94,6 +94,11 @@ const Contact = () => {
 
   return (
     <PageLayout>
+      <PageMeta
+        title="Contact TechStore"
+        description="Get in touch with TechStore for questions about products, orders, shipping, returns, or support. We're here to help."
+        path="/contact"
+      />
       <h1 className="text-3xl font-bold mb-8">Contact Us</h1>
       
       <div className="grid lg:grid-cols-2 gap-8">
