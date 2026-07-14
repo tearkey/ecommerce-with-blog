@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import PageLayout from "@/components/PageLayout";
+import PageMeta from "@/components/PageMeta";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +50,11 @@ const Blog = () => {
   if (postsLoading) {
     return (
       <PageLayout>
+        <PageMeta
+          title="Blog"
+          description="Tech reviews, buying guides, and industry news from the TechStore blog."
+          path="/blog"
+        />
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-8">Blog</h1>
           
@@ -98,6 +104,11 @@ const Blog = () => {
 
   return (
     <PageLayout>
+      <PageMeta
+        title="Blog"
+        description="Tech reviews, buying guides, and industry news from the TechStore blog."
+        path="/blog"
+      />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Blog</h1>
         

@@ -19,6 +19,7 @@ import { CartSheet } from "@/components/CartSheet";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { type Product } from "@/types/product";
+import PageMeta from "@/components/PageMeta";
 
 // Sample products data - in a real app, this would come from an API or context
 const products: Product[] = [
@@ -84,6 +85,13 @@ const ProductDetail = () => {
   
   return (
     <div className="container mx-auto px-4 py-8">
+      <PageMeta
+        title={product.name}
+        description={`${product.description} — ${product.category} at TechStore. $${product.price.toFixed(2)}.`}
+        path={`/products/${product.id}`}
+        image={product.image}
+        type="product"
+      />
       <div className="flex justify-between items-center mb-4">
         <Breadcrumbs />
         <CartSheet />

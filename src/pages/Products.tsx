@@ -7,6 +7,7 @@ import type { Product } from "@/types/product";
 import { useCart } from "@/context/CartContext";
 import { Link, useSearchParams } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
+import PageMeta from "@/components/PageMeta";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
@@ -100,6 +101,15 @@ const Products = () => {
 
   return (
     <PageLayout>
+      <PageMeta
+        title={searchQuery ? `Search: "${searchQuery}"` : "All Products"}
+        description={
+          searchQuery
+            ? `Search results for "${searchQuery}" at TechStore.`
+            : "Browse laptops, desktops, monitors, and peripherals at TechStore."
+        }
+        path="/products"
+      />
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">
           {searchQuery ? `Search Results: "${searchQuery}"` : "All Products"}
