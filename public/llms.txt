@@ -1,0 +1,20 @@
+# twinweb-creator
+
+> An ecommerce storefront with a built-in blog, product catalog, and admin tools. Browse electronics and tech products, read articles, and manage orders through the admin panel.
+
+## Pages
+
+- [Home](/): Featured products, promotions, and latest blog posts.
+- [Products](/products): Browse the full product catalog.
+- [Product Detail](/products/:id): Individual product pages with details and add-to-cart.
+- [New Products](/new-products): Recently added products.
+- [Offers](/offers): Current deals and promotions.
+- [About](/about): Information about the store and team.
+- [Contact](/contact): Contact form and support details.
+- [Blog](/blog): Articles, news, and buying guides.
+- [Blog Post](/blog/:slug): Individual blog articles.
+- [Support](/support): Help center and customer support information.
+- [Shipping](/shipping): Shipping policies and delivery information.
+- [Returns](/returns): Return and refund policies.
+- [Privacy](/privacy): Privacy policy.
+- [Terms](/terms): Terms of service.
